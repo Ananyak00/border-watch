@@ -1,0 +1,60 @@
+{
+  "source": 0,
+  "loop": false,
+  "model": "yolov8n.pt",
+  "conf": 0.35,
+  "imgsz": 640,
+  "line": {
+    "p1": [
+      9,
+      423
+    ],
+    "p2": [
+      618,
+      431
+    ],
+    "direction": "any"
+  },
+  "buffer_zone": [
+    [
+      9,
+      31
+    ],
+    [
+      623,
+      38
+    ],
+    [
+      623,
+      405
+    ],
+    [
+      9,
+      394
+    ]
+  ],
+  "restricted_zone": [
+    [
+      146,
+      109
+    ],
+    [
+      152,
+      306
+    ],
+    [
+      495,
+      320
+    ],
+    [
+      491,
+      111
+    ]
+  ],
+  "dwell_seconds": 10,
+  "dwell_grace_seconds": 2,
+  "abandon_seconds": 15,
+  "abandon_person_radius": 150,
+  "abandon_move_tolerance": 25,
+  "identity": true
+}
