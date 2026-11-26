@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Border Watch: smarter alerts on the CCTV you already have</title>
+<meta name="description" content="Border Watch adds real-time detection, tracking and event alerts to existing CCTV cameras, with no new hardware.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #edf1f3; --paper: #ffffff; --ink: #12212a; --muted: #4a5c66;
+    --line: #c9d3d9; --teal: #0e5a63; --alert: #c2410c;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size: 17px; line-height: 1.55;
+  }
+  a { color: var(--teal); }
+  :focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header.top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
+  .brand { font-weight: 800; font-size: 19px; letter-spacing: -0.01em; }
+  nav a { margin-left: 22px; text-decoration: none; color: var(--muted); font-weight: 500; }
+  nav a:hover { color: var(--ink); }
+
+  .hero { padding: 36px 0 28px; max-width: 760px; }
+  h1 { font-size: clamp(34px, 6vw, 60px); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 18px; font-weight: 800; }
+  .lead { font-size: 20px; color: var(--muted); margin: 0 0 26px; max-width: 60ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-block; padding: 13px 22px; border-radius: 8px; font-weight: 700; font-size: 16px;
+    text-decoration: none; border: 2px solid var(--teal); background: var(--teal); color: #fff;
+  }
+  .btn.ghost { background: transparent; color: var(--teal); }
+  .btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+
+  .stage { background: #0f1830; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .stage video { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: 15px; margin: 10px 2px 0; }
+
+  section { padding: 56px 0 0; }
+  h2 { font-size: 30px; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 800; }
+  .sub { color: var(--muted); margin: 0 0 26px; max-width: 62ch; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+  .stat { padding: 22px 22px 20px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: 0; }
+  .stat b { display: block; font-size: 38px; line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; }
+  .stat span { color: var(--muted); font-size: 15px; }
+
+  .track { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 28px 28px 22px; }
+  .bar { position: relative; height: 10px; background: #dbe3e8; border-radius: 5px; margin: 62px 0 34px; }
+  .mark { position: absolute; top: -8px; width: 0; }
+  .mark i { position: absolute; left: -9px; top: 0; width: 18px; height: 26px; border-radius: 9px; background: var(--alert); }
+  .mark.miss i { background: var(--paper); border: 3px dashed var(--alert); }
+  .mark em {
+    position: absolute; bottom: 36px; left: 0; transform: translateX(-50%);
+    font-style: normal; font-size: 14px; font-weight: 700; white-space: nowrap; line-height: 1.25; text-align: center;
+  }
+  .mark em small { display: block; font-weight: 500; color: var(--muted); font-size: 13px; }
+  .mark.last em { transform: translateX(-85%); }
+  .axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; }
+  .note { margin: 16px 0 0; color: var(--muted); font-size: 15px; }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .rule { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+  .rule h3 { margin: 0 0 4px; font-size: 18px; }
+  .rule p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  .live { margin-top: 56px; background: var(--ink); color: #eef3f5; border-radius: 12px; padding: 32px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
+  .live h2 { color: #fff; margin: 0 0 6px; }
+  .live p { margin: 0; color: #b8c6cd; max-width: 52ch; }
+  .live .btn { background: #fff; color: var(--ink); border-color: #fff; }
+
+  footer { padding: 44px 0 56px; color: var(--muted); font-size: 15px; }
+
+  @media (max-width: 760px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .rules { grid-template-columns: 1fr; }
+    .track { padding: 22px 16px 18px; }
+    .mark em { font-size: 12px; }
+    nav a { margin-left: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Border Watch</div>
+    <nav><a href="#demo">Recorded demo</a><a href="#results">Results</a><a href="#live">Live camera</a></nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Smarter alerts from the CCTV you already have.</h1>
+      <p class="lead">Border Watch reads your existing camera feed and raises an alert when someone crosses a line, lingers in a zone, leaves a bag behind or enters a restricted lane. No new cameras needed.</p>
+      <div class="actions">
+        <a class="btn" href="#demo">Watch the recorded demo</a>
+        <a class="btn ghost" id="liveBtn" href="#live">Open the live camera</a>
+      </div>
+    </div>
+
+    <div id="demo" class="stage">
+      <video controls playsinline preload="metadata" poster="poster.jpg" aria-label="Border Watch dashboard analysing a recorded test clip">
+        <source src="demo.mp4" type="video/mp4">
+        Your browser can’t play this video. <a href="demo.mp4">Download it instead.</a>
+      </video>
+    </div>
+    <p class="caption">The dashboard analysing a 67-second recorded test clip. Boxes mark people, and each alert is saved with a snapshot and its response time.</p>
+
+    <section id="results">
+      <h2>What it found on the test clip</h2>
+      <p class="sub">Three of the four planted events were caught in real time, with no false alarms. A laptop CPU was enough.</p>
+      <div class="stats">
+        <div class="stat"><b>3 of 4</b><span>events detected</span></div>
+        <div class="stat"><b>0</b><span>false alarms</span></div>
+        <div class="stat"><b>62.5 ms</b><span>average alert latency</span></div>
+        <div class="stat"><b>11.8 FPS</b><span>on a laptop CPU</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>When each alert fired</h2>
+      <p class="sub">The 67-second clip, with the moment each event was flagged.</p>
+      <div class="track">
+        <div class="bar" role="img" aria-label="Timeline of the 67 second clip: line crossing at 11.9 seconds, loitering at 38.0 and 58.8 seconds, and a bag left behind at about 66 seconds that was missed.">
+          <div class="mark" style="left:17.8%"><i></i><em>Line crossing<small>11.9 s</small></em></div>
+          <div class="mark" style="left:56.7%"><i></i><em>Loitering<small>38.0 s</small></em></div>
+          <div class="mark" style="left:87.8%"><i></i><em>Loitering<small>58.8 s</small></em></div>
+          <div class="mark miss last" style="left:98.5%"><i></i><em>Bag left behind<small>about 66 s, missed</small></em></div>
+        </div>
+        <div class="axis"><span>0 s</span><span>67 s</span></div>
+        <p class="note">The dashed marker is the one miss: the bag was only faintly visible to the detector, so it was not flagged. We report it rather than hide it.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Four rules, one engine</h2>
+      <p class="sub">The same detection feeds every rule, so a site only changes the lines and zones it draws.</p>
+      <div class="rules">
+        <div class="rule"><h3>Line crossing</h3><p>A tracked person or vehicle crosses a virtual boundary.</p></div>
+        <div class="rule"><h3>Loitering</h3><p>A person stays in a buffer zone longer than the allowed time.</p></div>
+        <div class="rule"><h3>Abandoned object</h3><p>A bag is left alone after its owner walks away.</p></div>
+        <div class="rule"><h3>Restricted lane</h3><p>A vehicle enters an area that is off limits to vehicles.</p></div>
+      </div>
+    </section>
+
+    <div id="live" class="live">
+      <div>
+        <h2>See it on a live camera</h2>
+        <p id="liveText">The live dashboard shows camera detection, zones and name checks in real time. It is available during demo sessions.</p>
+      </div>
+      <a class="btn" id="liveBtn2" href="#live" aria-disabled="true">Live link not set yet</a>
+    </div>
+  </main>
+
+  <footer>
+    Project source on <a href="https://github.com/Ananyak00/border-watch">GitHub</a>.
+  </footer>
+</div>
+
+<script>
+  // Paste your public live-demo link between the quotes, for example "https://example.trycloudflare.com".
+  var LIVE_URL = "";
+
+  if (LIVE_URL) {
+    ["liveBtn", "liveBtn2"].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.href = LIVE_URL; el.target = "_blank"; el.rel = "noopener";
+      el.removeAttribute("aria-disabled");
+    });
+    document.getElementById("liveBtn2").textContent = "Launch live demo";
+  }
+</script>
+</body>
+</html>
